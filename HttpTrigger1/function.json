@@ -1,13 +1,13 @@
 {
-  "disabled": false,
   "bindings": [
     {
+      "authLevel": "anonymous",
       "type": "httpTrigger",
       "direction": "in",
       "name": "req",
-      "authLevel": "anonymous",
       "methods": [
-        "GET"
+        "get",
+        "post"
       ]
     },
     {
@@ -15,7 +15,5 @@
       "direction": "out",
       "name": "res"
     }
-  ],
-  "entryPoint": "sayGoodbye",
-  "scriptFile": "../src/handlers/goodbye.js"
+  ]
 }
