@@ -40,7 +40,9 @@
     },
     "variables": {
         "vNetName": "[concat(parameters('projectName'), '-vnet')]",
+        "vNetAddressPrefixes": "10.0.0.0/16",
         "vNetSubnetName": "default",
+        "vNetSubnetAddressPrefix": "10.0.0.0/24",
         "vmName": "[concat(parameters('projectName'), '-vm')]",
         "publicIPAddressName": "[concat(parameters('projectName'), '-ip')]",
         "networkInterfaceName": "[concat(parameters('projectName'), '-nic')]",
