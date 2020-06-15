@@ -26,18 +26,25 @@
             "metadata": {
                 "description": "Specifies a password for the Virtual Machine."
             }
+        },
+        "storageAccountName": {
+            "type": "string"
+        },
+        "newOrExistingStorage": {
+            "type": "string",
+            "allowedValues": [
+                "new",
+                "existing"
+            ]
         }
     },
     "variables": {
         "vNetName": "[concat(parameters('projectName'), '-vnet')]",
-        "vNetAddressPrefixes": "10.0.0.0/16",
         "vNetSubnetName": "default",
-        "vNetSubnetAddressPrefix": "10.0.0.0/24",
         "vmName": "[concat(parameters('projectName'), '-vm')]",
         "publicIPAddressName": "[concat(parameters('projectName'), '-ip')]",
         "networkInterfaceName": "[concat(parameters('projectName'), '-nic')]",
-        "networkSecurityGroupName": "[concat(parameters('projectName'), '-nsg')]",
-        "networkSecurityGroupName2": "[concat(variables('vNetSubnetName'), '-nsg')]"
+        "networkSecurityGroupName": "[concat(parameters('projectName'), '-nsg')]"
     },
     "resources": [
         {
@@ -74,57 +81,6 @@
             },
             "sku": {
                 "name": "Basic"
-            }
-        },
-        {
-            "comments": "Simple Network Security Group for subnet [variables('vNetSubnetName')]",
-            "type": "Microsoft.Network/networkSecurityGroups",
-            "apiVersion": "2019-08-01",
-            "name": "[variables('networkSecurityGroupName2')]",
-            "location": "[parameters('location')]",
-            "properties": {
-                "securityRules": [
-                    {
-                        "name": "default-allow-22",
-                        "properties": {
-                            "priority": 1000,
-                            "access": "Allow",
-                            "direction": "Inbound",
-                            "destinationPortRange": "22",
-                            "protocol": "Tcp",
-                            "sourceAddressPrefix": "*",
-                            "sourcePortRange": "*",
-                            "destinationAddressPrefix": "*"
-                        }
-                    }
-                ]
-            }
-        },
-        {
-            "type": "Microsoft.Network/virtualNetworks",
-            "apiVersion": "2018-11-01",
-            "name": "[variables('vNetName')]",
-            "location": "[parameters('location')]",
-            "dependsOn": [
-                "[resourceId('Microsoft.Network/networkSecurityGroups', variables('networkSecurityGroupName2'))]"
-            ],
-            "properties": {
-                "addressSpace": {
-                    "addressPrefixes": [
-                        "[variables('vNetAddressPrefixes')]"
-                    ]
-                },
-                "subnets": [
-                    {
-                        "name": "[variables('vNetSubnetName')]",
-                        "properties": {
-                            "addressPrefix": "[variables('vNetSubnetAddressPrefix')]",
-                            "networkSecurityGroup": {
-                                "id": "[resourceId('Microsoft.Network/networkSecurityGroups', variables('networkSecurityGroupName2'))]"
-                            }
-                        }
-                    }
-                ]
             }
         },
         {
@@ -170,7 +126,6 @@
                     "computerName": "[variables('vmName')]",
                     "adminUsername": "[parameters('adminUsername')]",
                     "adminPassword": "[parameters('adminPassword')]"
-
                 },
                 "storageProfile": {
                     "imageReference": {
@@ -212,6 +167,18 @@
                     "commandToExecute": "sudo yum -y install python2 && sudo alternatives --set python /usr/bin/python2 && sudo yum -y install java-11-openjdk-devel && sudo rpm -i --nodeps presto-server-rpm-332-e.3.rpm && service presto start"
                 }
             }
+        },
+        {
+            "condition": "[equals(parameters('newOrExistingStorage'),'new')]",
+            "name": "[parameters('storageAccountName')]",
+            "type": "Microsoft.Storage/storageAccounts",
+            "location": "[resourceGroup().location]",
+            "apiVersion": "2018-11-01",
+            "sku": {
+                "name": "Standard_LRS"
+            },
+            "kind": "Storage",
+            "properties": {},
         }
     ],
     "outputs": {
